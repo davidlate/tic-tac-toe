@@ -37,3 +37,10 @@
     justify-content: center;
     align-items: center;
 }
+
+.lowerInfo{
+    min-height: 75px;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
