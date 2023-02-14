@@ -1,13 +1,11 @@
-"use strict";
+'use strict';
+
 const game = GameStatus();
 const display = DisplayController();
 
-
 (function gameBoardSetup (numRows = 3, numColumns = 3) {
-
-    const gameBoard = document.querySelector('.gameBoard');
-
-    gameBoard.style.gridTemplateColumns = `repeat(${numColumns}, 1fr)`;
+  const gameBoard = document.querySelector('.gameBoard');
+  gameBoard.style.gridTemplateColumns = `repeat(${numColumns}, 1fr)`;
 
     for (let row=0; row<=numRows-1; row++){
         for (let column=0; column<=numColumns-1; column++){
@@ -16,7 +14,7 @@ const display = DisplayController();
             tile.dataset.row = row;
             tile.dataset.column = column;
             tile.dataset.pos = `${row}${column}`;
-            tile.textContent = `${row}${column}`;
+            // tile.textContent = `${row}${column}`;
         }
     }
 
@@ -26,8 +24,6 @@ const display = DisplayController();
 
 
 })();
-
-
 
 function GameStatus() {
 
@@ -80,6 +76,10 @@ function GameStatus() {
                 // console.log(`${stats.currentPlayer.name} Wins!!!`);
                 stats.winnerName = stats.currentPlayer.name;
             }
+            else if (checkTie()){
+                stats.winnerName = 'Tie';
+
+            }
             else {
                 (player===X) ? stats.currentPlayer=O : stats.currentPlayer=X;
             }
@@ -88,26 +88,35 @@ function GameStatus() {
         function checkFilled(){
             return stats.board.some(tile => (tile.pos === pos))
         }
+
+        function checkWin(row, col, player){
+
+            let sumRow = stats.rows[row].reduce((a,b) => a+b, 0);
+            let sumCol = stats.columns[col].reduce((a,b) => a+b, 0);
+            let sumLeftDiag = stats.leftDiag.values.reduce((a,b) => a+b, 0);
+            let sumRightDiag = stats.rightDiag.values.reduce((a,b) => a+b, 0);
+    
+            const sums = [sumRow, sumCol, sumLeftDiag, sumRightDiag];
+    
+            if(sums.some(sum => (sum === player.value * 3))) return true;
+        }
+    
+        function checkTie(){
+            console.log(stats.board.length);
+    
+            if(stats.board.length >= 9) return true;
+    
+        }
     }
 
 
-    function checkWin(row, col, player){
-
-        let sumRow = stats.rows[row].reduce((a,b) => a+b, 0);
-        let sumCol = stats.columns[col].reduce((a,b) => a+b, 0);
-        let sumLeftDiag = stats.leftDiag.values.reduce((a,b) => a+b, 0);
-        let sumRightDiag = stats.rightDiag.values.reduce((a,b) => a+b, 0);
-
-        const sums = [sumRow, sumCol, sumLeftDiag, sumRightDiag];
-
-        if(sums.some(sum => (sum === player.value * 3))) return true;
-    }
 
 
-
-    function Player(name, value){
+    function Player(name, value, isComputer=false){
         const occupied = [];
        
+
+        
         return{
             name,
             value,
@@ -118,6 +127,7 @@ function GameStatus() {
         addMove,
         stats,
     }
+
 };
 
 
@@ -135,7 +145,7 @@ function DisplayController(){
             if(game.stats.winnerName !== '') {
                 let winnerName = game.stats.winnerName
                 let banner = document.querySelector('.lowerInfo');
-                banner.textContent = `${winnerName} Wins!!`;
+                (winnerName ==='Tie') ?  banner.textContent = `${winnerName}!!` : banner.textContent = `${winnerName} Wins!!`;
             }
 
         })
