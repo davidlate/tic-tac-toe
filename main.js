@@ -110,8 +110,6 @@ function GameStatus() {
     }
 
 
-
-
     function Player(name, value, isComputer=false){
         const occupied = [];
        
