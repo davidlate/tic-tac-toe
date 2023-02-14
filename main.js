@@ -52,7 +52,9 @@ function GameStatus() {
         rightDiag:{
             boxes:['20', '11', '02'],
             values: []
-        }
+        },
+        emptBoard: ['00', '01', '02', '10', '11', '12', '20', '21', '22'],
+
         }
 
 
@@ -89,37 +91,40 @@ function GameStatus() {
             return stats.board.some(tile => (tile.pos === pos))
         }
 
-        function checkWin(row, col, player){
-
-            let sumRow = stats.rows[row].reduce((a,b) => a+b, 0);
-            let sumCol = stats.columns[col].reduce((a,b) => a+b, 0);
-            let sumLeftDiag = stats.leftDiag.values.reduce((a,b) => a+b, 0);
-            let sumRightDiag = stats.rightDiag.values.reduce((a,b) => a+b, 0);
-    
-            const sums = [sumRow, sumCol, sumLeftDiag, sumRightDiag];
-    
-            if(sums.some(sum => (sum === player.value * 3))) return true;
-        }
-    
-        function checkTie(){
-            console.log(stats.board.length);
-    
-            if(stats.board.length >= 9) return true;
-    
-        }
+        AImove();
     }
 
+    function checkWin(row, col, player){
+
+        let sumRow = stats.rows[row].reduce((a,b) => a+b, 0);
+        let sumCol = stats.columns[col].reduce((a,b) => a+b, 0);
+        let sumLeftDiag = stats.leftDiag.values.reduce((a,b) => a+b, 0);
+        let sumRightDiag = stats.rightDiag.values.reduce((a,b) => a+b, 0);
+
+        const sums = [sumRow, sumCol, sumLeftDiag, sumRightDiag];
+
+        if(sums.some(sum => (sum === player.value * 3))) return true;
+    }
+
+    function checkTie(){
+        // console.log(stats.board.length);
+
+        if(stats.board.length >= 9) return true;
+
+    }
 
     function Player(name, value, isComputer=false){
         const occupied = [];
        
-
         
         return{
             name,
             value,
+            isComputer,
         }
     }
+
+
 
     return{
         addMove,
