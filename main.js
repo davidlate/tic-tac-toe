@@ -32,6 +32,7 @@ function GameStatus() {
 
     const stats = {
         roundNum: 0,
+        gameState: 'play',
         board: [],
         currentPlayer: X,
         winnerName: '',
@@ -54,7 +55,6 @@ function GameStatus() {
             values: []
         },
         emptBoard: ['00', '01', '02', '10', '11', '12', '20', '21', '22'],
-
         }
 
 
@@ -62,8 +62,9 @@ function GameStatus() {
         let row = e.target.dataset.row;
         let col = e.target.dataset.column;
         let pos = `${row}${col}`;
+        const evalMov = evalMove();
 
-        if (!checkFilled()){
+        if (!evalMov.checkFilled(pos) && stats.gameState === 'play'){
 
             let player = stats.currentPlayer;
             stats.roundNum = stats.roundNum +1; //update round number
@@ -73,58 +74,76 @@ function GameStatus() {
             if(stats.leftDiag.boxes.includes(pos)) stats.leftDiag.values.push(stats.currentPlayer.value); //Add value for left diagonal if applicable
             if(stats.rightDiag.boxes.includes(pos)) stats.rightDiag.values.push(stats.currentPlayer.value); //Add check for right diagonal if applicable
 
+            if(evalMov.checkWin(pos) || evalMov.checkTie()) {
+                stats.gameState = 'End';
+                if(evalMov.checkWin(pos)) stats.winnerName = stats.currentPlayer.name;
+                else if (evalMov.checkTie()) stats.winnerName = 'Tie';
+            }
 
-            if(checkWin(row, col, stats.currentPlayer)) {
-                // console.log(`${stats.currentPlayer.name} Wins!!!`);
-                stats.winnerName = stats.currentPlayer.name;
-            }
-            else if (checkTie()){
-                stats.winnerName = 'Tie';
-
-            }
-            else {
-                (player===X) ? stats.currentPlayer=O : stats.currentPlayer=X;
-            }
+            else (player===X) ? stats.currentPlayer=O : stats.currentPlayer=X; //increment player's turn
+            
+            player.bestMove();
         }
 
-        function checkFilled(){
+
+    }
+
+
+    function evalMove(){
+        function checkWin(pos){
+            let row = pos[0];
+            let col = pos[1]
+            let sumRow = stats.rows[row].reduce((a,b) => a+b, 0);
+            let sumCol = stats.columns[col].reduce((a,b) => a+b, 0);
+            let sumLeftDiag = stats.leftDiag.values.reduce((a,b) => a+b, 0);
+            let sumRightDiag = stats.rightDiag.values.reduce((a,b) => a+b, 0);
+            const sums = [sumRow, sumCol, sumLeftDiag, sumRightDiag];
+            if(sums.some(sum => (sum === stats.currentPlayer.value * 3))) return true;
+        }
+
+        function checkTie(){
+            if(stats.board.length >= 9) return true;
+        }
+
+        function checkFilled(pos){
             return stats.board.some(tile => (tile.pos === pos))
         }
 
-        AImove();
-    }
-
-    function checkWin(row, col, player){
-
-        let sumRow = stats.rows[row].reduce((a,b) => a+b, 0);
-        let sumCol = stats.columns[col].reduce((a,b) => a+b, 0);
-        let sumLeftDiag = stats.leftDiag.values.reduce((a,b) => a+b, 0);
-        let sumRightDiag = stats.rightDiag.values.reduce((a,b) => a+b, 0);
-
-        const sums = [sumRow, sumCol, sumLeftDiag, sumRightDiag];
-
-        if(sums.some(sum => (sum === player.value * 3))) return true;
-    }
-
-    function checkTie(){
-        // console.log(stats.board.length);
-
-        if(stats.board.length >= 9) return true;
-
+        return {
+            checkWin,
+            checkTie,
+            checkFilled
+        }
     }
 
     function Player(name, value, isComputer=false){
         const occupied = [];
-       
         
-        return{
-            name,
-            value,
-            isComputer,
+
+        function bestMove(){
+
+            const player = stats.currentPlayer;
+            let oppPlayer;
+            let score;
+
+            (player===X) ? oppPlayer = O : oppPlayer = X;
+
+            stats.board.forEach(space =>{
+                if(stats.emptBoard.includes(space.pos)) stats.emptBoard.splice(stats.emptBoard.indexOf(space.pos), 1);
+            })
+
+
+            
         }
+
+    return{
+        name,
+        value,
+        isComputer,
+        bestMove,
     }
-
-
+    }
+    
 
     return{
         addMove,
